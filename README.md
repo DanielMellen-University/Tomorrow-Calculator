@@ -35,5 +35,21 @@ A clean and intuitive web application that performs accurate temporal calculatio
 
 1. Open `index.html` in any modern web browser
 2. Select the current day from the dropdown menu
-3. Click **"Calculate Tomorrow"**
+3. Click **"Calculate Tomorrow"** (if you skip step 2, the page shows a "Please select a day first!" alert instead)
 4. The system processes the temporal calculation and displays tomorrow's day of the week
+
+---
+
+## 📸 Screenshots
+
+![Start screen](docs/screenshots/start.png)
+The temporal computation system, standing by.
+
+![Loading](docs/screenshots/loading.png)
+Heavy calculations in progress. Please do not turn off your calendar.
+
+![Result](docs/screenshots/result.png)
+Friday in, Saturday out. 100% accuracy confirmed.
+
+![Mobile result](docs/screenshots/mobile-result.png)
+Sunday wraps to Monday, now on your phone.
