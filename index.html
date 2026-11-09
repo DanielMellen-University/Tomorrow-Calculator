@@ -3,363 +3,711 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tomorrow's Day Calculator</title>
+    <title>Tomorrow Calculator</title>
+    <meta name="description" content="Advanced temporal computation. Find out what day it is tomorrow.">
+    <meta name="theme-color" content="#07081a">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ffd29a'/%3E%3Cstop offset='.5' stop-color='%23ff8a5b'/%3E%3Cstop offset='1' stop-color='%23f0507a'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='%2310122b'/%3E%3Cpath d='M7 21a9 9 0 0 1 18 0z' fill='url(%23g)'/%3E%3Crect x='5' y='23' width='22' height='2' rx='1' fill='%23ffffff' opacity='.5'/%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --bg: #07081a;
+            --bg-2: #0d0f2b;
+            --ink: #f4f1ff;
+            --ink-2: rgba(232, 228, 255, 0.72);
+            --ink-3: rgba(232, 228, 255, 0.5);
+            --line: rgba(255, 255, 255, 0.09);
+            --line-2: rgba(255, 255, 255, 0.16);
+            --glass: rgba(20, 22, 54, 0.55);
+            --sun-1: #ffd29a;
+            --sun-2: #ff9a62;
+            --sun-3: #f2557d;
+            --sunrise: linear-gradient(100deg, var(--sun-1) 0%, var(--sun-2) 45%, var(--sun-3) 100%);
+            --violet: #8b7cff;
+            --radius: 22px;
+            --ease: cubic-bezier(0.22, 1, 0.36, 1);
         }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { color-scheme: dark; }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: radial-gradient(ellipse at top, #1a1a2e 0%, #0f0f1e 50%, #000000 100%);
-            color: #ffffff;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
             overflow-x: hidden;
-            position: relative;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
 
-        /* Animated background particles */
-        .particles {
+        /* ---------- Sky ---------- */
+        .sky {
             position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            overflow: hidden;
+            inset: 0;
             z-index: 0;
             pointer-events: none;
+            background:
+                radial-gradient(1200px 600px at 50% -10%, rgba(139, 124, 255, 0.22), transparent 60%),
+                radial-gradient(900px 500px at 85% 20%, rgba(80, 60, 200, 0.18), transparent 60%),
+                linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 55%, #1a1235 100%);
         }
 
-        .particle {
+        .stars {
             position: absolute;
-            width: 3px;
-            height: 3px;
-            background: rgba(100, 200, 255, 0.5);
+            inset: 0;
+            opacity: 0.7;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
             border-radius: 50%;
-            bottom: -10px;
-            animation: float 20s infinite;
+            background: #fff;
+            animation: twinkle var(--d, 5s) ease-in-out infinite;
+            animation-delay: var(--delay, 0s);
         }
 
-        @keyframes float {
-            0% {
-                transform: translateY(0) translateX(0);
-                opacity: 0;
-            }
-            10% {
-                opacity: 1;
-            }
-            90% {
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-100vh) translateX(50px);
-                opacity: 0;
-            }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.15; }
+            50% { opacity: 0.9; }
         }
 
-        .container {
-            position: relative;
-            z-index: 1;
+        .horizon {
+            position: absolute;
+            left: 50%;
+            bottom: -58vmax;
+            width: 120vmax;
+            height: 80vmax;
+            transform: translateX(-50%);
+            border-radius: 50%;
+            background: radial-gradient(closest-side, rgba(255, 170, 110, 0.75), rgba(242, 85, 125, 0.42) 42%, rgba(139, 124, 255, 0.12) 72%, transparent 100%);
+            filter: blur(20px);
+            animation: rise 1.6s var(--ease) both;
+        }
+
+        .horizon::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 4vmax;
+            width: 70%;
+            height: 1px;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, transparent, rgba(255, 210, 154, 0.8), transparent);
+        }
+
+        @keyframes rise {
+            from { transform: translate(-50%, 12vmax); opacity: 0; }
+            to { transform: translate(-50%, 0); opacity: 1; }
+        }
+
+        /* ---------- Layout ---------- */
+        .nav, main, footer { position: relative; z-index: 1; }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: min(1080px, 100% - 48px);
+            margin: 0 auto;
+            padding: 24px 0;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: -0.01em;
+            color: var(--ink);
+            text-decoration: none;
+        }
+
+        .brand-mark { width: 26px; height: 26px; }
+
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--ink-2);
+            padding: 6px 12px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.18);
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: min(560px, 100% - 40px);
+            margin: 0 auto;
+            padding: 4vh 0 48px;
             text-align: center;
-            padding: 40px;
-            max-width: 600px;
-            width: 90%;
         }
 
-        .title-wrapper {
-            margin-bottom: 60px;
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px 6px 6px;
+            margin-bottom: 26px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--ink-2);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(8px);
+            animation: fade-up 0.9s var(--ease) both;
+        }
+
+        .eyebrow-tag {
+            padding: 3px 9px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #2a1020;
+            background: var(--sunrise);
         }
 
         h1 {
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            font-weight: 800;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            font-size: clamp(2.6rem, 7vw, 4.4rem);
+            font-weight: 600;
+            line-height: 1.02;
+            letter-spacing: -0.045em;
+            margin-bottom: 18px;
+            animation: fade-up 0.9s 0.08s var(--ease) both;
+        }
+
+        h1 em {
+            font-family: 'Instrument Serif', Georgia, serif;
+            font-style: italic;
+            font-weight: 400;
+            letter-spacing: -0.02em;
+            padding-right: 0.06em;
+            background: var(--sunrise);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 15px;
-            letter-spacing: -0.5px;
+            color: transparent;
         }
 
         .subtitle {
-            font-size: clamp(1rem, 2vw, 1.2rem);
-            color: rgba(255, 255, 255, 0.6);
-            font-weight: 300;
-        }
-
-        .input-section {
+            font-size: clamp(1rem, 2.2vw, 1.12rem);
+            line-height: 1.55;
+            color: var(--ink-2);
+            max-width: 420px;
             margin-bottom: 40px;
-            transform-style: preserve-3d;
+            animation: fade-up 0.9s 0.16s var(--ease) both;
         }
 
-        .select-wrapper {
-            position: relative;
-            margin-bottom: 25px;
+        @keyframes fade-up {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
         }
+
+        /* ---------- Card ---------- */
+        .card {
+            position: relative;
+            width: 100%;
+            padding: 28px;
+            border-radius: var(--radius);
+            background: var(--glass);
+            border: 1px solid var(--line);
+            backdrop-filter: blur(22px) saturate(140%);
+            -webkit-backdrop-filter: blur(22px) saturate(140%);
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.06) inset,
+                0 30px 80px -20px rgba(0, 0, 0, 0.6),
+                0 0 0 1px rgba(0, 0, 0, 0.2);
+            text-align: left;
+            animation: fade-up 0.9s 0.24s var(--ease) both;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 40%, rgba(255, 154, 98, 0) 70%, rgba(255, 154, 98, 0.35));
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .panel[hidden] { display: none; }
+
+        .panel { animation: panel-in 0.6s var(--ease) both; }
+
+        @keyframes panel-in {
+            from { opacity: 0; transform: translateY(8px) scale(0.99); }
+            to { opacity: 1; transform: none; }
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 14px;
+        }
+
+        .label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--ink-3);
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: var(--ink-3);
+        }
+
+        .select-wrap { position: relative; margin-bottom: 16px; }
 
         select {
             width: 100%;
-            padding: 20px 25px;
-            font-size: 1.1rem;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            color: #ffffff;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
+            padding: 18px 52px 18px 20px;
+            font: inherit;
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: var(--ink);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--line-2);
+            border-radius: 14px;
             appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%23667eea' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 20px center;
+            -webkit-appearance: none;
+            cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
         }
+
+        select:invalid, select.empty { color: var(--ink-3); }
 
         select:hover {
-            border-color: rgba(102, 126, 234, 0.5);
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-2px);
+            background-color: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.26);
         }
 
-        select:focus {
+        select:focus-visible {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            border-color: var(--sun-2);
+            box-shadow: 0 0 0 4px rgba(255, 154, 98, 0.18);
         }
 
-        select option {
-            background: #1a1a2e;
-            color: #ffffff;
-            padding: 10px;
+        select option { background: #14163a; color: var(--ink); }
+
+        .chevron {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            width: 18px;
+            height: 18px;
+            transform: translateY(-50%);
+            color: var(--ink-2);
+            pointer-events: none;
         }
 
-        button {
-            width: 100%;
-            padding: 20px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 16px;
-            color: #ffffff;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        .btn {
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 17px 20px;
+            font: inherit;
+            font-size: 1.02rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: #24101c;
+            background: var(--sunrise);
+            border: 0;
+            border-radius: 14px;
+            cursor: pointer;
             overflow: hidden;
+            box-shadow: 0 10px 30px -8px rgba(255, 122, 92, 0.55), 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+            transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), filter 0.2s;
         }
 
-        button::before {
+        .btn::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
+            inset: 0;
+            background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.8s var(--ease);
         }
 
-        button:hover::before {
-            left: 100%;
-        }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 16px 40px -10px rgba(255, 122, 92, 0.7), 0 1px 0 rgba(255, 255, 255, 0.5) inset; }
+        .btn:hover::after { transform: translateX(100%); }
+        .btn:active { transform: translateY(0); filter: brightness(0.96); }
+        .btn:focus-visible { outline: 2px solid var(--sun-1); outline-offset: 3px; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
-        }
+        .btn svg { width: 18px; height: 18px; transition: transform 0.25s var(--ease); }
+        .btn:hover svg { transform: translateX(3px); }
 
-        button:active {
-            transform: translateY(-1px);
-        }
-
-        button:disabled {
-            background: rgba(255, 255, 255, 0.1);
-            cursor: not-allowed;
+        .btn-ghost {
+            color: var(--ink);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--line-2);
             box-shadow: none;
         }
 
-        button:disabled:hover {
-            transform: none;
-        }
+        .btn-ghost:hover { background: rgba(255, 255, 255, 0.09); box-shadow: none; }
+        .btn-ghost::after { display: none; }
 
-        .loading-section {
-            min-height: 150px;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            margin-top: 30px;
-        }
-
-        .loading-section.active {
-            display: flex;
-            opacity: 1;
-        }
-
-        .spinner-wrapper {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            margin-bottom: 30px;
-        }
-
-        .spinner {
-            width: 80px;
-            height: 80px;
-            border: 4px solid rgba(102, 126, 234, 0.1);
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        .spinner-glow {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            box-shadow: 0 0 30px rgba(102, 126, 234, 0.5);
-            animation: pulse-glow 2s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes pulse-glow {
-            0%, 100% { opacity: 0.5; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.1); }
-        }
-
-        .loading-text {
-            font-size: 1rem;
-            color: rgba(255, 255, 255, 0.8);
+        .fineprint {
+            margin-top: 14px;
+            font-size: 0.78rem;
+            color: var(--ink-3);
             text-align: center;
-            max-width: 500px;
-            line-height: 1.6;
-            min-height: 60px;
+        }
+
+        /* ---------- Loading ---------- */
+        .compute-head {
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 16px;
+            margin-bottom: 22px;
         }
 
-        .result-section {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(102, 126, 234, 0.3);
-            border-radius: 20px;
-            padding: 30px;
-            backdrop-filter: blur(10px);
-            display: none;
-            opacity: 0;
-            transform: scale(0.9);
-            transition: all 0.5s ease;
-            margin-top: 30px;
+        .orbit {
+            position: relative;
+            flex: none;
+            width: 52px;
+            height: 52px;
         }
 
-        .result-section.show {
-            display: block;
-            opacity: 1;
-            transform: scale(1);
+        .orbit svg { width: 100%; height: 100%; animation: spin 1.4s linear infinite; }
+
+        .orbit::after {
+            content: '';
+            position: absolute;
+            inset: 15px;
+            border-radius: 50%;
+            background: var(--sunrise);
+            box-shadow: 0 0 24px rgba(255, 154, 98, 0.7);
+            animation: pulse 1.8s ease-in-out infinite;
         }
 
-        .result-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            animation: bounce 0.6s ease;
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { transform: scale(0.85); } 50% { transform: scale(1.05); } }
+
+        .compute-title { font-size: 1.08rem; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 3px; }
+        .compute-sub { font-size: 0.85rem; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+
+        .progress {
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.07);
+            overflow: hidden;
+            margin-bottom: 20px;
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            background: var(--sunrise);
+            box-shadow: 0 0 12px rgba(255, 154, 98, 0.8);
+            transition: width 0.8s var(--ease);
+        }
+
+        .log {
+            list-style: none;
+            display: grid;
+            gap: 10px;
+            align-content: start;
+            min-height: 116px;
+            font-size: 0.9rem;
+            line-height: 1.45;
+        }
+
+        .log li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            color: var(--ink-3);
+            animation: log-in 0.5s var(--ease) both;
+        }
+
+        .log li.current { color: var(--ink); }
+
+        @keyframes log-in {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: none; }
+        }
+
+        .log-icon {
+            flex: none;
+            display: grid;
+            place-items: center;
+            width: 20px;
+            height: 20px;
+            margin-top: 1px;
+            border-radius: 50%;
+        }
+
+        .log li.done .log-icon { background: rgba(74, 222, 128, 0.14); color: #4ade80; }
+        .log li.done .log-icon svg { width: 12px; height: 12px; }
+
+        .log li.current .log-icon::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 154, 98, 0.25);
+            border-top-color: var(--sun-2);
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* ---------- Result ---------- */
+        .result { text-align: center; padding: 6px 0 2px; }
+
+        .result-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--ink-3);
+            margin-bottom: 8px;
+        }
+
+        .result-kicker svg { width: 16px; height: 16px; color: #4ade80; }
+
+        .result-day {
+            font-family: 'Instrument Serif', Georgia, serif;
+            font-style: italic;
+            font-size: clamp(3.4rem, 12vw, 5.2rem);
+            line-height: 1.05;
+            letter-spacing: -0.02em;
+            padding: 0 0.1em;
+            background: var(--sunrise);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: day-in 1s var(--ease) both;
+        }
+
+        @keyframes day-in {
+            from { opacity: 0; transform: translateY(18px); filter: blur(8px); }
+            to { opacity: 1; transform: none; filter: blur(0); }
         }
 
         .result-text {
-            font-size: 1.3rem;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.9);
-        }
-        
-        .result-text br {
-            display: none;
+            margin: 10px auto 24px;
+            font-size: 1rem;
+            line-height: 1.55;
+            color: var(--ink-2);
         }
 
-        .result-highlight {
-            color: #667eea;
-            font-weight: 700;
+        .result-highlight { color: var(--ink); font-weight: 600; }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            margin-bottom: 22px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .stat { padding: 14px 10px; }
+        .stat + .stat { border-left: 1px solid var(--line); }
+        .stat-value { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.01em; font-variant-numeric: tabular-nums; }
+        .stat-label { margin-top: 2px; font-size: 0.72rem; color: var(--ink-3); }
+
+        /* ---------- Footer ---------- */
+        footer {
+            width: min(1080px, 100% - 48px);
+            margin: 0 auto;
+            padding: 22px 0 28px;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.8rem;
+            color: var(--ink-3);
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
         }
 
         @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-            }
-            
-            h1 {
-                font-size: 2rem;
+            .nav { width: calc(100% - 32px); padding: 18px 0; }
+            .status-text-long { display: none; }
+            main { width: calc(100% - 32px); padding-top: 4vh; }
+            .eyebrow { margin-bottom: 20px; }
+            .subtitle { margin-bottom: 30px; }
+            .card { padding: 22px 18px; }
+            footer { width: calc(100% - 32px); flex-direction: column; align-items: center; text-align: center; gap: 4px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
             }
         }
     </style>
 </head>
 <body>
-    <div class="particles" id="particles"></div>
-    
-    <div class="container">
-        <div class="title-wrapper">
-            <h1>Tomorrow Calculator</h1>
-            <p class="subtitle">Advanced temporal computation system</p>
-        </div>
-
-        <div class="input-section">
-            <div class="select-wrapper">
-                <select id="daySelect">
-                    <option value="">Select today's day...</option>
-                    <option value="Monday">Monday</option>
-                    <option value="Tuesday">Tuesday</option>
-                    <option value="Wednesday">Wednesday</option>
-                    <option value="Thursday">Thursday</option>
-                    <option value="Friday">Friday</option>
-                    <option value="Saturday">Saturday</option>
-                    <option value="Sunday">Sunday</option>
-                </select>
-            </div>
-            <button id="calculateBtn" onclick="calculate()">Calculate Tomorrow</button>
-        </div>
-
-        <div class="loading-section" id="loadingSection">
-            <div class="spinner-wrapper">
-                <div class="spinner-glow"></div>
-                <div class="spinner"></div>
-            </div>
-            <div class="loading-text" id="loadingText"></div>
-        </div>
-
-        <div class="result-section" id="resultSection">
-            <div class="result-icon">🎉</div>
-            <div class="result-text" id="resultText"></div>
-        </div>
+    <div class="sky" aria-hidden="true">
+        <div class="stars" id="stars"></div>
+        <div class="horizon"></div>
     </div>
 
+    <header class="nav">
+        <a class="brand" href="./" aria-label="Tomorrow Calculator home">
+            <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+                <defs>
+                    <linearGradient id="brandSun" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0" stop-color="#ffd29a"/>
+                        <stop offset=".5" stop-color="#ff8a5b"/>
+                        <stop offset="1" stop-color="#f0507a"/>
+                    </linearGradient>
+                </defs>
+                <rect width="32" height="32" rx="8" fill="#151738" stroke="rgba(255,255,255,.14)"/>
+                <path d="M7 21a9 9 0 0 1 18 0z" fill="url(#brandSun)"/>
+                <rect x="5" y="23" width="22" height="2" rx="1" fill="#fff" opacity=".55"/>
+            </svg>
+            Tomorrow
+        </a>
+        <span class="status"><span class="status-dot"></span><span>All systems operational<span class="status-text-long">, including Sunday</span></span></span>
+    </header>
+
+    <main>
+        <span class="eyebrow"><span class="eyebrow-tag">New</span>Now accurate to the nearest day</span>
+        <h1>Tomorrow,<br><em>calculated.</em></h1>
+        <p class="subtitle">Advanced temporal computation system. Tell us what day it is. We'll handle the rest.</p>
+
+        <section class="card" aria-live="polite">
+            <!-- Input -->
+            <div class="panel" id="inputSection">
+                <div class="label-row">
+                    <label class="label" for="daySelect">Today is</label>
+                    <span class="hint">Step 1 of 1</span>
+                </div>
+                <div class="select-wrap">
+                    <select id="daySelect" class="empty">
+                        <option value="">Select today's day...</option>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                        <option value="Saturday">Saturday</option>
+                        <option value="Sunday">Sunday</option>
+                    </select>
+                    <svg class="chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <button class="btn" id="calculateBtn" type="button" onclick="calculate()">
+                    Calculate Tomorrow
+                    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <p class="fineprint">Works for all seven days. Results valid until midnight.</p>
+            </div>
+
+            <!-- Loading -->
+            <div class="panel" id="loadingSection" hidden>
+                <div class="compute-head">
+                    <div class="orbit" aria-hidden="true">
+                        <svg viewBox="0 0 52 52" fill="none">
+                            <circle cx="26" cy="26" r="23" stroke="rgba(255,255,255,.08)" stroke-width="3"/>
+                            <circle cx="26" cy="26" r="23" stroke="url(#orbitGrad)" stroke-width="3" stroke-linecap="round" stroke-dasharray="40 200"/>
+                            <defs>
+                                <linearGradient id="orbitGrad" x1="0" y1="0" x2="1" y2="1">
+                                    <stop offset="0" stop-color="#ffd29a"/>
+                                    <stop offset="1" stop-color="#f2557d"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="compute-title">Computing tomorrow</div>
+                        <div class="compute-sub" id="computeSub">Starting up</div>
+                    </div>
+                </div>
+                <div class="progress" role="progressbar" aria-label="Calculation progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <ol class="log" id="loadingText"></ol>
+            </div>
+
+            <!-- Result -->
+            <div class="panel result" id="resultSection" hidden>
+                <div class="result-kicker">
+                    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="currentColor" opacity=".16"/><path d="M6 10.5l2.5 2.5L14 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Tomorrow is
+                </div>
+                <div class="result-day" id="resultDay"></div>
+                <p class="result-text" id="resultText"></p>
+                <div class="stats">
+                    <div class="stat"><div class="stat-value">100%</div><div class="stat-label">Confidence</div></div>
+                    <div class="stat"><div class="stat-value" id="statTime">0.0s</div><div class="stat-label">Compute time</div></div>
+                    <div class="stat"><div class="stat-value" id="statChecks">0</div><div class="stat-label">Checks passed</div></div>
+                </div>
+                <button class="btn btn-ghost" id="againBtn" type="button" onclick="reset()">Calculate another tomorrow</button>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <span>&copy; Tomorrow Calculator</span>
+        <span>Tomorrow is always one day away.</span>
+    </footer>
+
     <script>
-        // Create floating particles
-        const particlesContainer = document.getElementById('particles');
-        for (let i = 0; i < 30; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 20 + 's';
-            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
-            particlesContainer.appendChild(particle);
+        // Stars
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 70; i++) {
+            const star = document.createElement('span');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 65 + '%';
+            star.style.setProperty('--d', (3 + Math.random() * 5) + 's');
+            star.style.setProperty('--delay', (Math.random() * -8) + 's');
+            if (Math.random() > 0.85) { star.style.width = star.style.height = '3px'; }
+            starsContainer.appendChild(star);
         }
 
+        const daySelect = document.getElementById('daySelect');
+        daySelect.addEventListener('change', () => {
+            daySelect.classList.toggle('empty', !daySelect.value);
+        });
+
         const loadingMessages = [
-            // Your original ones...
             'Calibrating temporal displacement sensors...',
             'Analyzing spacetime fabric curvature...',
             'Computing relativistic time dilation...',
@@ -402,13 +750,28 @@
             'Computing tomorrow\'s entropy increase...',
             'Verifying arrow of time is still pointing forward...',
         ];
+
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+        function getTomorrow(today) {
+            const currentIndex = days.indexOf(today);
+            return days[(currentIndex + 1) % 7];
+        }
+
+        const checkIcon = '<svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 6.2l2.3 2.3L9.5 3.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+        function show(panel) {
+            ['inputSection', 'loadingSection', 'resultSection'].forEach((id) => {
+                document.getElementById(id).hidden = id !== panel;
+            });
+        }
+
         function calculate() {
-            const daySelect = document.getElementById('daySelect');
             const selectedDay = daySelect.value;
-            const loadingSection = document.getElementById('loadingSection');
-            const loadingText = document.getElementById('loadingText');
-            const resultSection = document.getElementById('resultSection');
-            const resultText = document.getElementById('resultText');
+            const log = document.getElementById('loadingText');
+            const computeSub = document.getElementById('computeSub');
+            const progress = document.getElementById('progress');
+            const progressBar = document.getElementById('progressBar');
             const calculateBtn = document.getElementById('calculateBtn');
 
             if (!selectedDay) {
@@ -416,51 +779,67 @@
                 return;
             }
 
-            // Reset UI
             calculateBtn.disabled = true;
-            resultSection.classList.remove('show');
-            loadingSection.classList.add('active');
+            log.innerHTML = '';
+            progressBar.style.width = '0%';
+            show('loadingSection');
 
-            // Shuffle and select random messages
-            const shuffled = loadingMessages.sort(() => 0.5 - Math.random());
-            const numMessages = 4 + Math.floor(Math.random() * 3); // 4-6 messages
+            // Shuffle a copy and pick 4-6 messages
+            const shuffled = [...loadingMessages].sort(() => 0.5 - Math.random());
+            const numMessages = 4 + Math.floor(Math.random() * 3);
             const selectedMessages = shuffled.slice(0, numMessages);
-
+            const startedAt = performance.now();
             let messageIndex = 0;
-            
-            function showNextMessage() {
-                if (messageIndex < selectedMessages.length) {
-                    loadingText.style.opacity = '0';
-                    loadingText.style.transform = 'translateY(10px)';
-                    
-                    setTimeout(() => {
-                        loadingText.textContent = selectedMessages[messageIndex];
-                        loadingText.style.transition = 'all 0.5s ease';
-                        loadingText.style.opacity = '1';
-                        loadingText.style.transform = 'translateY(0)';
-                        
-                        messageIndex++;
-                        const delay = 2000 + Math.random() * 2000; // 2-4 seconds
-                        setTimeout(showNextMessage, delay);
-                    }, 500);
-                } else {
-                    // Show final result
-                    setTimeout(() => {
-                        loadingSection.classList.remove('active');
-                        
-                        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-                        const currentIndex = days.indexOf(selectedDay);
-                        const nextIndex = (currentIndex + 1) % 7;
-                        const nextDay = days[nextIndex];
 
-                        resultText.innerHTML = `If today is <span class="result-highlight">${selectedDay}</span>, then tomorrow is <span class="result-highlight">${nextDay}</span>!`;
-                        resultSection.classList.add('show');
+            function setProgress(pct) {
+                progressBar.style.width = pct + '%';
+                progress.setAttribute('aria-valuenow', String(Math.round(pct)));
+            }
+
+            function showNextMessage() {
+                const previous = log.querySelector('li.current');
+                if (previous) {
+                    previous.classList.remove('current');
+                    previous.classList.add('done');
+                    previous.querySelector('.log-icon').innerHTML = checkIcon;
+                }
+
+                if (messageIndex < selectedMessages.length) {
+                    const item = document.createElement('li');
+                    item.className = 'current';
+                    item.innerHTML = '<span class="log-icon"></span><span></span>';
+                    item.lastChild.textContent = selectedMessages[messageIndex];
+                    log.appendChild(item);
+                    while (log.children.length > 4) { log.removeChild(log.firstChild); }
+
+                    messageIndex++;
+                    computeSub.textContent = 'Step ' + messageIndex + ' of ' + selectedMessages.length;
+                    setProgress((messageIndex / (selectedMessages.length + 1)) * 100);
+                    const delay = 2000 + Math.random() * 2000; // 2-4 seconds
+                    setTimeout(showNextMessage, delay);
+                } else {
+                    computeSub.textContent = 'Finalizing result';
+                    setProgress(100);
+                    setTimeout(() => {
+                        const nextDay = getTomorrow(selectedDay);
+                        document.getElementById('resultDay').textContent = nextDay;
+                        document.getElementById('resultText').innerHTML =
+                            `If today is <span class="result-highlight">${selectedDay}</span>, then tomorrow is <span class="result-highlight">${nextDay}</span>.`;
+                        document.getElementById('statTime').textContent = ((performance.now() - startedAt) / 1000).toFixed(1) + 's';
+                        document.getElementById('statChecks').textContent = String(selectedMessages.length);
+                        show('resultSection');
                         calculateBtn.disabled = false;
+                        document.getElementById('againBtn').focus({ preventScroll: true });
                     }, 1000);
                 }
             }
 
             showNextMessage();
+        }
+
+        function reset() {
+            show('inputSection');
+            daySelect.focus({ preventScroll: true });
         }
     </script>
 </body>
