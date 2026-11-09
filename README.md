@@ -45,7 +45,7 @@ You could. You could also do your own taxes.
 Tomorrow is a serious question.
 
 **What happens after Sunday?**
-Monday. We checked.
+Monday. I checked.
 
 **Does it handle time zones, leap years or the International Date Line?**
 It thinks about them very hard and then gives you the next day of the week anyway.
