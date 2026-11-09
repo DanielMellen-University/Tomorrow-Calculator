@@ -36,14 +36,6 @@ open index.html   # or just double-click it
 
 Pick today's day, press **Calculate Tomorrow**, and wait. Skip the first step and you get a "Please select a day first!" alert, because the system needs something to work with.
 
-## Screenshots
-
-| Ready | Computing |
-| :---: | :---: |
-| <img src="docs/screenshots/start.png" alt="Start screen" width="400"> | <img src="docs/screenshots/loading.png" alt="Calculation in progress" width="400"> |
-| **Result** | **Mobile** |
-| <img src="docs/screenshots/result.png" alt="Result: Saturday" width="400"> | <img src="docs/screenshots/mobile-result.png" alt="Mobile result: Sunday wraps to Monday" width="200"> |
-
 ## FAQ
 
 **Couldn't I just work this out myself?**
