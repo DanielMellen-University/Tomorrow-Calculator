@@ -12,7 +12,7 @@
 
 [**Try it live**](https://danielmellen-university.github.io/Tomorrow-Calculator/)
 
-<img src="docs/screenshots/result.png" alt="Tomorrow Calculator showing that if today is Friday, tomorrow is Saturday" width="820">
+<img src="docs/screenshots/start.png" alt="Tomorrow Calculator start screen" width="820">
 
 </div>
 
