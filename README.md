@@ -58,7 +58,7 @@ It thinks about them very hard and then gives you the next day of the week anywa
 
 ## Built with
 
-HTML, CSS and vanilla JavaScript in a single `index.html`. Type is Inter and Instrument Serif from Google Fonts.
+HTML, CSS and vanilla JavaScript in a single `index.html`. Type is Inter from Google Fonts.
 
 ## License
 
