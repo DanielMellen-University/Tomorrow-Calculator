@@ -1,55 +1,73 @@
-# 📅 Tomorrow Calculator
+<div align="center">
 
-**Next Day Calculator with Temporal Precision**
+# Tomorrow Calculator
 
-A clean and intuitive web application that performs accurate temporal calculations to determine what day comes after today. Using chronological algorithms and calendar system logic, this tool provides precise day-of-the-week calculations with a modern, engaging interface.
+**Tell it what day it is. It tells you what day it will be tomorrow.**
 
----
+[![Live demo](https://img.shields.io/badge/live_demo-open-ff9a62?style=flat-square)](https://danielmellen-university.github.io/Tomorrow-Calculator/)
+![HTML5](https://img.shields.io/badge/HTML5-single_file-e34f26?style=flat-square&logo=html5&logoColor=white)
+![Dependencies](https://img.shields.io/badge/dependencies-zero-4ade80?style=flat-square)
+![Accuracy](https://img.shields.io/badge/accuracy-100%25-8b7cff?style=flat-square)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
-## ✨ Features
+[**Try it live**](https://danielmellen-university.github.io/Tomorrow-Calculator/)
 
-- **📅 Day Calculation** - Accurately calculates and displays tomorrow's day of the week based on your selection
-- **⏱️ Temporal Processing** - Smooth loading sequence that simulates calendar system calculations
-- **🎨 Visual Feedback** - Beautiful animations and visual effects that enhance the user experience
-- **📱 Cross-Platform** - Works seamlessly on mobile, tablet, and desktop devices
-- **🔬 Accurate Results** - Uses precise temporal algorithms to ensure 100% accuracy in day-of-the-week calculations
+<img src="docs/screenshots/result.png" alt="Tomorrow Calculator showing that if today is Friday, tomorrow is Saturday" width="820">
 
----
+</div>
 
-## 🛠️ Technology Stack
+## Features
 
-- **HTML5** - Semantic structure
-- **CSS3** - Custom animations, keyframes, and advanced styling
-- **Vanilla JavaScript** - Temporal logic, DOM manipulation, and smooth animations
+- **Next-day computation** for all seven days, Sunday included
+- **Rigorous processing.** Every request runs through 4 to 6 verification steps, picked from 41 checks covering cesium clocks, tachyons and the arrow of time
+- **100% confidence** on every result, reported right there on the result card
+- **Works on your phone,** in case tomorrow comes up while you're out
+- **Zero dependencies.** One HTML file, no build step, no framework
 
----
+## Quickstart
 
-## 🚀 Getting Started
+Open [the live demo](https://danielmellen-university.github.io/Tomorrow-Calculator/), or run it locally:
 
-### Prerequisites
+```bash
+git clone https://github.com/DanielMellen-University/Tomorrow-Calculator.git
+cd Tomorrow-Calculator
+open index.html   # or just double-click it
+```
 
-- A modern web browser (Chrome, Firefox, Safari, Edge)
-- No additional dependencies or installation required!
+Pick today's day, press **Calculate Tomorrow**, and wait. Skip the first step and you get a "Please select a day first!" alert, because the system needs something to work with.
 
-### Usage
+## Screenshots
 
-1. Open `index.html` in any modern web browser
-2. Select the current day from the dropdown menu
-3. Click **"Calculate Tomorrow"** (if you skip step 2, the page shows a "Please select a day first!" alert instead)
-4. The system processes the temporal calculation and displays tomorrow's day of the week
+| Ready | Computing |
+| :---: | :---: |
+| <img src="docs/screenshots/start.png" alt="Start screen" width="400"> | <img src="docs/screenshots/loading.png" alt="Calculation in progress" width="400"> |
+| **Result** | **Mobile** |
+| <img src="docs/screenshots/result.png" alt="Result: Saturday" width="400"> | <img src="docs/screenshots/mobile-result.png" alt="Mobile result: Sunday wraps to Monday" width="200"> |
 
----
+## FAQ
 
-## 📸 Screenshots
+**Couldn't I just work this out myself?**
+You could. You could also do your own taxes.
 
-![Start screen](docs/screenshots/start.png)
-The temporal computation system, standing by.
+**Why does it take 15 seconds?**
+Tomorrow is a serious question.
 
-![Loading](docs/screenshots/loading.png)
-Heavy calculations in progress. Please do not turn off your calendar.
+**What happens after Sunday?**
+Monday. We checked.
 
-![Result](docs/screenshots/result.png)
-Friday in, Saturday out. 100% accuracy confirmed.
+**Does it handle time zones, leap years or the International Date Line?**
+It thinks about them very hard and then gives you the next day of the week anyway.
 
-![Mobile result](docs/screenshots/mobile-result.png)
-Sunday wraps to Monday, now on your phone.
+## Limitations
+
+- Only goes one day ahead. The day after tomorrow is on the roadmap.
+- Needs you to know what day it is today.
+- Results expire at midnight.
+
+## Built with
+
+HTML, CSS and vanilla JavaScript in a single `index.html`. Type is Inter and Instrument Serif from Google Fonts.
+
+## License
+
+[MIT](LICENSE)
