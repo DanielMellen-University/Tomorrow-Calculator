@@ -313,6 +313,49 @@
 
         select option { background: #14163a; color: var(--ink); }
 
+        /* ---------- Custom dropdown (fine pointers) ---------- */
+        .dd-trigger {
+            display: flex; align-items: center; width: 100%; text-align: left;
+            padding: 18px 52px 18px 20px; font: inherit; font-size: 1.05rem; font-weight: 500;
+            color: var(--ink); background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--line-2); border-radius: 14px; cursor: pointer;
+            transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+        }
+        .dd-trigger.empty { color: var(--ink-3); }
+        .dd-trigger:hover { background-color: rgba(255, 255, 255, 0.07); border-color: rgba(255, 255, 255, 0.26); }
+        .dd-trigger:focus-visible, .dd-open .dd-trigger {
+            outline: none; border-color: var(--sun-2); box-shadow: 0 0 0 4px rgba(255, 154, 98, 0.18);
+        }
+        .dd-open .chevron { transform: translateY(-50%) rotate(180deg); }
+        .chevron { transition: transform 0.25s var(--ease); }
+        .dd-list {
+            position: absolute; left: 0; right: 0; top: calc(100% + 8px); z-index: 20;
+            list-style: none; padding: 6px; margin: 0;
+            background: #121330;
+            -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+            border: 1px solid var(--line-2); border-radius: 14px;
+            box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+            opacity: 0; transform: translateY(-6px) scale(0.98); transform-origin: top center;
+            pointer-events: none; transition: opacity 0.18s ease, transform 0.22s var(--ease);
+        }
+        .dd-open .dd-list { opacity: 1; transform: none; pointer-events: auto; }
+        .dd-option {
+            position: relative; display: flex; align-items: center; justify-content: space-between;
+            padding: 11px 14px; border-radius: 9px; font-size: 0.98rem; font-weight: 500;
+            color: var(--ink-2); cursor: pointer; user-select: none;
+            transition: background-color 0.12s, color 0.12s;
+        }
+        .dd-option.active { background: rgba(255, 154, 98, 0.12); color: var(--ink); }
+        .dd-option.active::before {
+            content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; width: 3px;
+            border-radius: 3px; background: var(--sunrise);
+        }
+        .dd-option[aria-selected="true"] { color: var(--ink); }
+        .dd-option .dd-check { width: 16px; height: 16px; color: var(--sun-2); opacity: 0; }
+        .dd-option[aria-selected="true"] .dd-check { opacity: 1; }
+        .sr-select { position: absolute !important; width: 1px; height: 1px; opacity: 0; pointer-events: none; overflow: hidden; clip: rect(0 0 0 0); }
+        @media (prefers-reduced-motion: reduce) { .dd-list, .chevron { transition: none; } }
+
         .chevron {
             position: absolute;
             right: 18px;
@@ -703,6 +746,107 @@
             daySelect.classList.toggle('empty', !daySelect.value);
         });
 
+        // Replace the native option list (and its system blue highlight) on mouse/trackpad devices.
+        let ddTrigger = null;
+        if (window.matchMedia('(pointer: fine)').matches) {
+            const wrap = daySelect.parentElement;
+            const days = Array.from(daySelect.options).filter(o => o.value);
+            const placeholder = daySelect.options[0].textContent;
+            const check = '<svg class="dd-check" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4.5 10.5l3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+            ddTrigger = document.createElement('button');
+            ddTrigger.type = 'button';
+            ddTrigger.className = 'dd-trigger empty';
+            ddTrigger.id = 'dayTrigger';
+            ddTrigger.setAttribute('aria-haspopup', 'listbox');
+            ddTrigger.setAttribute('aria-expanded', 'false');
+            ddTrigger.textContent = placeholder;
+
+            const list = document.createElement('ul');
+            list.className = 'dd-list';
+            list.setAttribute('role', 'listbox');
+            list.setAttribute('aria-label', 'Today is');
+            days.forEach((o, i) => {
+                const li = document.createElement('li');
+                li.className = 'dd-option';
+                li.id = 'dd-opt-' + i;
+                li.setAttribute('role', 'option');
+                li.setAttribute('aria-selected', 'false');
+                li.dataset.value = o.value;
+                li.innerHTML = '<span>' + o.textContent + '</span>' + check;
+                list.appendChild(li);
+            });
+
+            daySelect.classList.add('sr-select');
+            daySelect.tabIndex = -1;
+            daySelect.setAttribute('aria-hidden', 'true');
+            wrap.insertBefore(ddTrigger, daySelect);
+            wrap.appendChild(list);
+            document.querySelector('label[for="daySelect"]').setAttribute('for', 'dayTrigger');
+
+            const items = Array.from(list.children);
+            let active = -1;
+            const setActive = (i) => {
+                items.forEach(el => el.classList.remove('active'));
+                active = i;
+                if (i >= 0) { items[i].classList.add('active'); ddTrigger.setAttribute('aria-activedescendant', items[i].id); }
+                else ddTrigger.removeAttribute('aria-activedescendant');
+            };
+            const sync = () => {
+                const v = daySelect.value;
+                ddTrigger.textContent = v || placeholder;
+                ddTrigger.classList.toggle('empty', !v);
+                items.forEach(el => el.setAttribute('aria-selected', String(el.dataset.value === v)));
+            };
+            const open = () => {
+                wrap.classList.add('dd-open');
+                ddTrigger.setAttribute('aria-expanded', 'true');
+                const sel = items.findIndex(el => el.dataset.value === daySelect.value);
+                setActive(sel >= 0 ? sel : 0);
+            };
+            const close = () => {
+                wrap.classList.remove('dd-open');
+                ddTrigger.setAttribute('aria-expanded', 'false');
+                setActive(-1);
+            };
+            const choose = (i) => {
+                daySelect.value = items[i].dataset.value;
+                daySelect.dispatchEvent(new Event('change', { bubbles: true }));
+                close();
+                ddTrigger.focus();
+            };
+            const isOpen = () => wrap.classList.contains('dd-open');
+
+            ddTrigger.addEventListener('click', () => (isOpen() ? close() : open()));
+            ddTrigger.addEventListener('keydown', (e) => {
+                if (['ArrowDown', 'ArrowUp'].includes(e.key)) {
+                    e.preventDefault();
+                    if (!isOpen()) return open();
+                    const n = items.length;
+                    setActive((active + (e.key === 'ArrowDown' ? 1 : n - 1)) % n);
+                } else if (e.key === 'Home' && isOpen()) { e.preventDefault(); setActive(0); }
+                else if (e.key === 'End' && isOpen()) { e.preventDefault(); setActive(items.length - 1); }
+                else if ((e.key === 'Enter' || e.key === ' ') && isOpen()) { e.preventDefault(); if (active >= 0) choose(active); }
+                else if (e.key === 'Escape' || e.key === 'Tab') { close(); }
+                else if (/^[a-z]$/i.test(e.key)) {
+                    const k = e.key.toLowerCase();
+                    const start = active + 1;
+                    for (let j = 0; j < items.length; j++) {
+                        const idx = (start + j) % items.length;
+                        if (items[idx].dataset.value[0].toLowerCase() === k) { if (!isOpen()) open(); setActive(idx); break; }
+                    }
+                }
+            });
+            items.forEach((el, i) => {
+                el.addEventListener('mouseenter', () => setActive(i));
+                el.addEventListener('mousedown', (e) => e.preventDefault());
+                el.addEventListener('click', () => choose(i));
+            });
+            document.addEventListener('mousedown', (e) => { if (isOpen() && !wrap.contains(e.target)) close(); });
+            daySelect.addEventListener('change', sync);
+            sync();
+        }
+
         const loadingMessages = [
             'Calibrating temporal displacement sensors...',
             'Analyzing spacetime fabric curvature...',
@@ -835,7 +979,7 @@
 
         function reset() {
             show('inputSection');
-            daySelect.focus({ preventScroll: true });
+            (ddTrigger || daySelect).focus({ preventScroll: true });
         }
     </script>
 </body>
