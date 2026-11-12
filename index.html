@@ -779,11 +779,13 @@
             ddTrigger.className = 'dd-trigger empty';
             ddTrigger.id = 'dayTrigger';
             ddTrigger.setAttribute('aria-haspopup', 'listbox');
+            ddTrigger.setAttribute('aria-controls', 'dayList');
             ddTrigger.setAttribute('aria-expanded', 'false');
             ddTrigger.textContent = placeholder;
 
             const list = document.createElement('ul');
             list.className = 'dd-list';
+            list.id = 'dayList';
             list.setAttribute('role', 'listbox');
             list.setAttribute('aria-label', 'Today is');
             days.forEach((o, i) => {
