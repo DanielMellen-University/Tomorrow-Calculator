@@ -34,7 +34,7 @@ cd Tomorrow-Calculator
 open index.html   # or just double-click it
 ```
 
-Pick today's day, press **Calculate Tomorrow**, and wait. Skip the first step and you get a "Please select a day first!" alert, because the system needs something to work with.
+Pick today's day, press **Calculate Tomorrow**, and wait. Skip the first step and the form tells you to pick a day first, because the system needs something to work with.
 
 ## FAQ
 

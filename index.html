@@ -424,6 +424,13 @@
             text-align: center;
         }
 
+        .form-error {
+            margin: 12px 0 0;
+            font-size: 0.9rem;
+            color: #ff9d8a;
+            text-align: center;
+        }
+
         /* ---------- Loading ---------- */
         .compute-head {
             display: flex;
@@ -674,6 +681,7 @@
                     Calculate Tomorrow
                     <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
+                <p class="form-error" id="dayError" role="alert" hidden>Please select a day first.</p>
                 <p class="fineprint">Works for all seven days. Results valid until midnight.</p>
             </div>
 
@@ -741,8 +749,10 @@
         }
 
         const daySelect = document.getElementById('daySelect');
+        const dayError = document.getElementById('dayError');
         daySelect.addEventListener('change', () => {
             daySelect.classList.toggle('empty', !daySelect.value);
+            dayError.hidden = true;
         });
 
         // Replace the native option list (and its system blue highlight) on mouse/trackpad devices.
@@ -915,7 +925,8 @@
             const calculateBtn = document.getElementById('calculateBtn');
 
             if (!selectedDay) {
-                alert('Please select a day first!');
+                dayError.hidden = false;
+                (ddTrigger || daySelect).focus({ preventScroll: true });
                 return;
             }
 
