@@ -431,6 +431,16 @@
             text-align: center;
         }
 
+        .noscript-note {
+            margin: 0 0 18px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 157, 138, 0.5);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: #ff9d8a;
+            text-align: center;
+        }
+
         /* ---------- Loading ---------- */
         .compute-head {
             display: flex;
@@ -658,6 +668,7 @@
         <p class="subtitle">Never wonder what day tomorrow is again.</p>
 
         <section class="card" aria-live="polite">
+            <noscript><p class="noscript-note">Tomorrow Calculator needs JavaScript to compute tomorrow. Enable JavaScript and reload the page.</p></noscript>
             <!-- Input -->
             <div class="panel" id="inputSection">
                 <div class="label-row">
