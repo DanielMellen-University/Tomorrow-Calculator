@@ -1,0 +1,1 @@
+{"description":"Calculates the next day. A single-page web app with a very serious loading sequence.","license":"MIT","name":"tomorrow-calculator","private":true,"scripts":{"test":"node --test tests/tomorrow.test.mjs"},"version":"1.0.0"}
