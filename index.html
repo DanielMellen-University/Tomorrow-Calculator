@@ -894,6 +894,7 @@
 
         function getTomorrow(today) {
             const currentIndex = days.indexOf(today);
+            if (currentIndex === -1) return null;
             return days[(currentIndex + 1) % 7];
         }
 
