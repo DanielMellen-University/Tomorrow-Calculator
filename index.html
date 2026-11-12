@@ -691,7 +691,7 @@
                     </select>
                     <svg class="chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
-                <button class="btn" id="calculateBtn" type="button" onclick="calculate()">
+                <button class="btn" id="calculateBtn" type="button">
                     Calculate Tomorrow
                     <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
@@ -738,7 +738,7 @@
                     <div class="stat"><div class="stat-value" id="statTime">0.0s</div><div class="stat-label">Compute time</div></div>
                     <div class="stat"><div class="stat-value" id="statChecks">0</div><div class="stat-label">Checks passed</div></div>
                 </div>
-                <button class="btn btn-ghost" id="againBtn" type="button" onclick="reset()">Calculate another tomorrow</button>
+                <button class="btn btn-ghost" id="againBtn" type="button">Calculate another tomorrow</button>
             </div>
         </section>
     </main>
@@ -768,6 +768,8 @@
             daySelect.classList.toggle('empty', !daySelect.value);
             dayError.hidden = true;
         });
+        document.getElementById('calculateBtn').addEventListener('click', calculate);
+        document.getElementById('againBtn').addEventListener('click', reset);
 
         // Replace the native option list (and its system blue highlight) on mouse/trackpad devices.
         let ddTrigger = null;
