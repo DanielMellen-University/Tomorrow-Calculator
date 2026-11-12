@@ -931,6 +931,22 @@
             const startedAt = performance.now();
             let messageIndex = 0;
 
+            // Reduced-motion users asked out of animation: give them the
+            // answer straight away instead of the 9-25s loading sequence.
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            function finish(checksRun) {
+                const nextDay = getTomorrow(selectedDay);
+                document.getElementById('resultDay').textContent = nextDay;
+                document.getElementById('resultText').innerHTML =
+                    `If today is <span class="result-highlight">${selectedDay}</span>, then tomorrow is <span class="result-highlight">${nextDay}</span>.`;
+                document.getElementById('statTime').textContent = ((performance.now() - startedAt) / 1000).toFixed(1) + 's';
+                document.getElementById('statChecks').textContent = String(checksRun);
+                show('resultSection');
+                calculateBtn.disabled = false;
+                document.getElementById('againBtn').focus({ preventScroll: true });
+            }
+
             function setProgress(pct) {
                 progressBar.style.width = pct + '%';
                 progress.setAttribute('aria-valuenow', String(Math.round(pct)));
@@ -960,18 +976,13 @@
                 } else {
                     computeSub.textContent = 'Finalizing result';
                     setProgress(100);
-                    setTimeout(() => {
-                        const nextDay = getTomorrow(selectedDay);
-                        document.getElementById('resultDay').textContent = nextDay;
-                        document.getElementById('resultText').innerHTML =
-                            `If today is <span class="result-highlight">${selectedDay}</span>, then tomorrow is <span class="result-highlight">${nextDay}</span>.`;
-                        document.getElementById('statTime').textContent = ((performance.now() - startedAt) / 1000).toFixed(1) + 's';
-                        document.getElementById('statChecks').textContent = String(selectedMessages.length);
-                        show('resultSection');
-                        calculateBtn.disabled = false;
-                        document.getElementById('againBtn').focus({ preventScroll: true });
-                    }, 1000);
+                    setTimeout(() => finish(selectedMessages.length), 1000);
                 }
+            }
+
+            if (prefersReducedMotion) {
+                finish(0);
+                return;
             }
 
             showNextMessage();
