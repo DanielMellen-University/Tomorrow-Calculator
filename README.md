@@ -6,7 +6,7 @@
 
 [![Live demo](https://img.shields.io/badge/live_demo-open-ff9a62?style=flat-square)](https://danielmellen-university.github.io/Tomorrow-Calculator/)
 ![HTML5](https://img.shields.io/badge/HTML5-single_file-e34f26?style=flat-square&logo=html5&logoColor=white)
-![Dependencies](https://img.shields.io/badge/dependencies-zero-4ade80?style=flat-square)
+![Dependencies](https://img.shields.io/badge/dependencies-1_font-ff9a62?style=flat-square)
 ![Accuracy](https://img.shields.io/badge/accuracy-100%25-8b7cff?style=flat-square)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
@@ -22,7 +22,7 @@
 - **Rigorous processing.** Every request runs through 4 to 6 verification steps, picked from 41 checks covering cesium clocks, tachyons and the arrow of time
 - **100% confidence** on every result, reported right there on the result card
 - **Works on your phone,** in case tomorrow comes up while you're out
-- **Zero dependencies.** One HTML file, no build step, no framework
+- **One external dependency.** Inter from Google Fonts for type; otherwise one HTML file, no build step, no framework
 
 ## Quickstart
 
