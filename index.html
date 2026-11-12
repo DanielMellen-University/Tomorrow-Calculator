@@ -712,7 +712,7 @@
                         </svg>
                     </div>
                     <div>
-                        <div class="compute-title">Computing tomorrow</div>
+                        <div class="compute-title" id="computeTitle" tabindex="-1">Computing tomorrow</div>
                         <div class="compute-sub" id="computeSub">Starting up</div>
                     </div>
                 </div>
@@ -947,6 +947,7 @@
             log.innerHTML = '';
             progressBar.style.width = '0%';
             show('loadingSection');
+            document.getElementById('computeTitle').focus({ preventScroll: true });
 
             // Shuffle a copy and pick 4-6 messages
             const shuffled = [...loadingMessages].sort(() => 0.5 - Math.random());
