@@ -19,7 +19,7 @@
 ## Features
 
 - **Next-day computation** for all seven days, Sunday included
-- **Rigorous processing.** Every request runs through 4 to 6 verification steps, picked from 41 checks covering cesium clocks, tachyons and the arrow of time
+- **Rigorous processing.** During the normal loading sequence, every request runs through 4 to 6 verification steps, picked from 41 checks covering cesium clocks, tachyons and the arrow of time
 - **100% confidence** on every result, reported right there on the result card
 - **Works on your phone,** in case tomorrow comes up while you're out
 - **One external dependency.** Inter from Google Fonts for type; otherwise one HTML file, no build step, no framework

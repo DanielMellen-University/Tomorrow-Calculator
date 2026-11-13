@@ -671,6 +671,7 @@
         <p class="subtitle">Never wonder what day tomorrow is again.</p>
 
         <section class="card">
+            <div class="sr-only" id="resultAnnouncement" role="status" aria-atomic="true"></div>
             <noscript><p class="noscript-note">Tomorrow Calculator needs JavaScript to compute tomorrow. Enable JavaScript and reload the page.</p></noscript>
             <!-- Input -->
             <div class="panel" id="inputSection">
@@ -726,7 +727,7 @@
             </div>
 
             <!-- Result -->
-            <div class="panel result" id="resultSection" aria-live="polite" hidden>
+            <div class="panel result" id="resultSection" hidden>
                 <div class="result-kicker">
                     <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="currentColor" opacity=".16"/><path d="M6 10.5l2.5 2.5L14 7.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     Tomorrow is
@@ -976,6 +977,8 @@
                     `If today is <span class="result-highlight">${selectedDay}</span>, then tomorrow is <span class="result-highlight">${nextDay}</span>.`;
                 document.getElementById('statTime').textContent = ((performance.now() - startedAt) / 1000).toFixed(1) + 's';
                 document.getElementById('statChecks').textContent = String(checksRun);
+                document.getElementById('resultAnnouncement').textContent =
+                    `Tomorrow is ${nextDay}. If today is ${selectedDay}, then tomorrow is ${nextDay}.`;
                 show('resultSection');
                 calculateBtn.disabled = false;
                 document.getElementById('againBtn').focus({ preventScroll: true });
