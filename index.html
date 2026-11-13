@@ -298,7 +298,7 @@
             transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
         }
 
-        select:invalid, select.empty { color: var(--ink-3); }
+        select.empty { color: var(--ink-3); }
 
         select:hover {
             background-color: rgba(255, 255, 255, 0.07);
@@ -421,6 +421,23 @@
             margin-top: 14px;
             font-size: 0.78rem;
             color: var(--ink-3);
+            text-align: center;
+        }
+
+        .form-error {
+            margin: 12px 0 0;
+            font-size: 0.9rem;
+            color: #ff9d8a;
+            text-align: center;
+        }
+
+        .noscript-note {
+            margin: 0 0 18px;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 157, 138, 0.5);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: #ff9d8a;
             text-align: center;
         }
 
@@ -608,6 +625,9 @@
             .eyebrow { margin-bottom: 20px; }
             .subtitle { margin-bottom: 30px; }
             .card { padding: 22px 18px; }
+            /* The 3.4rem floor overflows the card at 320px ("Wednesday" is
+               285px wide in a 250px box); let it shrink with the viewport. */
+            .result-day { font-size: clamp(2.2rem, 11vw, 3.4rem); }
             footer { width: calc(100% - 32px); flex-direction: column; align-items: center; text-align: center; gap: 4px; }
         }
 
@@ -650,7 +670,9 @@
         <h1>Tomorrow<br><em>Calculator</em></h1>
         <p class="subtitle">Never wonder what day tomorrow is again.</p>
 
-        <section class="card" aria-live="polite">
+        <section class="card">
+            <div class="sr-only" id="resultAnnouncement" role="status" aria-atomic="true"></div>
+            <noscript><p class="noscript-note">Tomorrow Calculator needs JavaScript to compute tomorrow. Enable JavaScript and reload the page.</p></noscript>
             <!-- Input -->
             <div class="panel" id="inputSection">
                 <div class="label-row">
@@ -670,10 +692,11 @@
                     </select>
                     <svg class="chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M5 7.5l5 5 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
-                <button class="btn" id="calculateBtn" type="button" onclick="calculate()">
+                <button class="btn" id="calculateBtn" type="button">
                     Calculate Tomorrow
                     <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
+                <p class="form-error" id="dayError" role="alert" hidden>Please select a day first.</p>
                 <p class="fineprint">Works for all seven days. Results valid until midnight.</p>
             </div>
 
@@ -693,7 +716,7 @@
                         </svg>
                     </div>
                     <div>
-                        <div class="compute-title">Computing tomorrow</div>
+                        <div class="compute-title" id="computeTitle" tabindex="-1">Computing tomorrow</div>
                         <div class="compute-sub" id="computeSub">Starting up</div>
                     </div>
                 </div>
@@ -716,7 +739,7 @@
                     <div class="stat"><div class="stat-value" id="statTime">0.0s</div><div class="stat-label">Compute time</div></div>
                     <div class="stat"><div class="stat-value" id="statChecks">0</div><div class="stat-label">Checks passed</div></div>
                 </div>
-                <button class="btn btn-ghost" id="againBtn" type="button" onclick="reset()">Calculate another tomorrow</button>
+                <button class="btn btn-ghost" id="againBtn" type="button">Calculate another tomorrow</button>
             </div>
         </section>
     </main>
@@ -741,9 +764,13 @@
         }
 
         const daySelect = document.getElementById('daySelect');
+        const dayError = document.getElementById('dayError');
         daySelect.addEventListener('change', () => {
             daySelect.classList.toggle('empty', !daySelect.value);
+            dayError.hidden = true;
         });
+        document.getElementById('calculateBtn').addEventListener('click', calculate);
+        document.getElementById('againBtn').addEventListener('click', reset);
 
         // Replace the native option list (and its system blue highlight) on mouse/trackpad devices.
         let ddTrigger = null;
@@ -758,11 +785,13 @@
             ddTrigger.className = 'dd-trigger empty';
             ddTrigger.id = 'dayTrigger';
             ddTrigger.setAttribute('aria-haspopup', 'listbox');
+            ddTrigger.setAttribute('aria-controls', 'dayList');
             ddTrigger.setAttribute('aria-expanded', 'false');
             ddTrigger.textContent = placeholder;
 
             const list = document.createElement('ul');
             list.className = 'dd-list';
+            list.id = 'dayList';
             list.setAttribute('role', 'listbox');
             list.setAttribute('aria-label', 'Today is');
             days.forEach((o, i) => {
@@ -894,6 +923,7 @@
 
         function getTomorrow(today) {
             const currentIndex = days.indexOf(today);
+            if (currentIndex === -1) return null;
             return days[(currentIndex + 1) % 7];
         }
 
@@ -914,7 +944,8 @@
             const calculateBtn = document.getElementById('calculateBtn');
 
             if (!selectedDay) {
-                alert('Please select a day first!');
+                dayError.hidden = false;
+                (ddTrigger || daySelect).focus({ preventScroll: true });
                 return;
             }
 
@@ -922,13 +953,36 @@
             log.innerHTML = '';
             progressBar.style.width = '0%';
             show('loadingSection');
+            document.getElementById('computeTitle').focus({ preventScroll: true });
 
-            // Shuffle a copy and pick 4-6 messages
-            const shuffled = [...loadingMessages].sort(() => 0.5 - Math.random());
+            // Shuffle a copy (Fisher-Yates) and pick 4-6 messages
+            const shuffled = [...loadingMessages];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
             const numMessages = 4 + Math.floor(Math.random() * 3);
             const selectedMessages = shuffled.slice(0, numMessages);
             const startedAt = performance.now();
             let messageIndex = 0;
+
+            // Reduced-motion users asked out of animation: give them the
+            // answer straight away instead of the 9-25s loading sequence.
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            function finish(checksRun) {
+                const nextDay = getTomorrow(selectedDay);
+                document.getElementById('resultDay').textContent = nextDay;
+                document.getElementById('resultText').innerHTML =
+                    `If today is <span class="result-highlight">${selectedDay}</span>, then tomorrow is <span class="result-highlight">${nextDay}</span>.`;
+                document.getElementById('statTime').textContent = ((performance.now() - startedAt) / 1000).toFixed(1) + 's';
+                document.getElementById('statChecks').textContent = String(checksRun);
+                document.getElementById('resultAnnouncement').textContent =
+                    `Tomorrow is ${nextDay}. If today is ${selectedDay}, then tomorrow is ${nextDay}.`;
+                show('resultSection');
+                calculateBtn.disabled = false;
+                document.getElementById('againBtn').focus({ preventScroll: true });
+            }
 
             function setProgress(pct) {
                 progressBar.style.width = pct + '%';
@@ -959,18 +1013,13 @@
                 } else {
                     computeSub.textContent = 'Finalizing result';
                     setProgress(100);
-                    setTimeout(() => {
-                        const nextDay = getTomorrow(selectedDay);
-                        document.getElementById('resultDay').textContent = nextDay;
-                        document.getElementById('resultText').innerHTML =
-                            `If today is <span class="result-highlight">${selectedDay}</span>, then tomorrow is <span class="result-highlight">${nextDay}</span>.`;
-                        document.getElementById('statTime').textContent = ((performance.now() - startedAt) / 1000).toFixed(1) + 's';
-                        document.getElementById('statChecks').textContent = String(selectedMessages.length);
-                        show('resultSection');
-                        calculateBtn.disabled = false;
-                        document.getElementById('againBtn').focus({ preventScroll: true });
-                    }, 1000);
+                    setTimeout(() => finish(selectedMessages.length), 1000);
                 }
+            }
+
+            if (prefersReducedMotion) {
+                finish(0);
+                return;
             }
 
             showNextMessage();
